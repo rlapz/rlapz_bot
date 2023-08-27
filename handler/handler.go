@@ -38,6 +38,8 @@ func HandleFn(r *http.Request, url string) {
 			return
 		}
 
+		log.Println("url: ", _url)
+
 		hreq.Header.Set("Content-Type", "application/json; charset=UTF-8")
 		var cl http.Client
 		resp, err := cl.Do(hreq)
