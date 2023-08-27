@@ -31,7 +31,7 @@ func HandleFn(r *http.Request, url string) {
 			res.Message.Chat.Id, reply,
 		)
 
-		var _url = url + ""
+		var _url = url + "/sendMessage"
 		hreq, err := http.NewRequest(http.MethodPost, _url, strings.NewReader(req))
 		if err != nil {
 			log.Println("NewRequest: ", err.Error())
