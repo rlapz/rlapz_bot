@@ -25,12 +25,8 @@ func ServerInit(config *config.Config) Server {
 
 func (self *Server) Run() error {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		log.Println("header: ", r.Header)
-
-		secret, ok := r.Header["X-Telegram-Bot-Api-Secret-Token"]
-
-		if ok && r.Method == http.MethodPost {
-			log.Println("secret: ", secret)
+		var tok = r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
+		if tok == self.config.Secret && r.Method == http.MethodPost {
 			handler.HandleFn(r, self.config.Url)
 		}
 	})
