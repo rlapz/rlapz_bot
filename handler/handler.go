@@ -43,7 +43,13 @@ func handleChatPrivate(url string, update *types.Update) {
 }
 
 func handleChatGroup(url string, update *types.Update) {
+	var reply = "Hello, " + update.Message.From.Username + " ;)"
 
+	var req = fmt.Sprintf("{\"chat_id\":\"%v\", \"text\":\"%s\"}",
+		update.Message.Chat.Id, reply,
+	)
+
+	request.Send(url, "/sendMessage", req)
 }
 
 func handleChatSuperGroup(url string, update *types.Update) {
