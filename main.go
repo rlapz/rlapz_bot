@@ -21,7 +21,7 @@ func main() {
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		var tok = r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
 		if tok == config.Secret && r.Method == http.MethodPost {
-			handler.HandleFn(r, config.Url)
+			handler.Handle(r, config.Url)
 		}
 	})
 

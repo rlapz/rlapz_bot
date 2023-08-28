@@ -10,7 +10,7 @@ import (
 	"github.com/rlapz/rlapz_bot/types"
 )
 
-func HandleFn(r *http.Request, url string) {
+func Handle(r *http.Request, url string) {
 	var res types.Update
 	if err := json.NewDecoder(r.Body).Decode(&res); err != nil {
 		log.Println("HandleFn: json.NewDecoder: ", err.Error())
@@ -22,13 +22,30 @@ func HandleFn(r *http.Request, url string) {
 		return
 	}
 
-	if res.Message.Chat.Type == types.ChatTypePrivate {
-		var reply = "Hello, " + res.Message.From.Username
-
-		var req = fmt.Sprintf("{\"chat_id\":\"%v\", \"text\":\"%s\"}",
-			res.Message.Chat.Id, reply,
-		)
-
-		go request.Send(url, "/sendMessage", req)
+	switch res.Message.Chat.Type {
+	case types.ChatTypePrivate:
+		go handleChatPrivate(url, &res)
+	case types.ChatTypeGroup:
+		go handleChatGroup(url, &res)
+	case types.ChatTypeSuperGroup:
+		go handleChatSuperGroup(url, &res)
 	}
+}
+
+func handleChatPrivate(url string, update *types.Update) {
+	var reply = "Hello, " + update.Message.From.Username
+
+	var req = fmt.Sprintf("{\"chat_id\":\"%v\", \"text\":\"%s\"}",
+		update.Message.Chat.Id, reply,
+	)
+
+	request.Send(url, "/sendMessage", req)
+}
+
+func handleChatGroup(url string, update *types.Update) {
+
+}
+
+func handleChatSuperGroup(url string, update *types.Update) {
+
 }
