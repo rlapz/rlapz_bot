@@ -9,22 +9,32 @@ import (
 	"time"
 
 	"github.com/rlapz/rlapz_bot/config"
-	"github.com/rlapz/rlapz_bot/server"
+	"github.com/rlapz/rlapz_bot/handler"
 )
 
 func main() {
 	var config = config.ConfigInit(".env")
-	var srv = server.ServerInit(&config)
+	var srv = http.Server{
+		Addr: config.ListenAddr,
+	}
 
-	go func() {
-		if err := srv.Run(); err != nil {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		var tok = r.Header.Get("X-Telegram-Bot-Api-Secret-Token")
+		if tok == config.Secret && r.Method == http.MethodPost {
+			handler.HandleFn(r, config.Url)
+		}
+	})
+
+	go func(ctx *http.Server) {
+		log.Printf("http.Server: running on: %s\n", config.ListenAddr)
+		if err := ctx.ListenAndServe(); err != nil {
 			if err != http.ErrServerClosed {
-				log.Fatalln("server.Run: ", err.Error())
+				log.Fatalln("http.ListenAndServe: ", err.Error())
 			}
 
-			log.Println("server.Run: http server closed")
+			log.Println("http.ListenAndServe: http server closed")
 		}
-	}()
+	}(&srv)
 
 	var qChan = make(chan os.Signal, 1)
 	signal.Notify(qChan, os.Interrupt)
@@ -33,7 +43,7 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancel()
 
-	if err := srv.Stop(ctx); err != nil {
-		log.Println("server.Stop: ", err.Error())
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatalln("http.ListenAndServe: ", err.Error())
 	}
 }
