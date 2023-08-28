@@ -22,6 +22,8 @@ func Handle(r *http.Request, url string) {
 		return
 	}
 
+	log.Println("Chat type: ", res.Message.Chat.Type)
+
 	switch res.Message.Chat.Type {
 	case types.ChatTypePrivate:
 		go handleChatPrivate(url, &res)
