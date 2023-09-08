@@ -29,7 +29,9 @@ LISTEN_PORT = int(os.getenv("LISTEN_PORT"))
 
 
 async def startup_fn(bot: Bot) -> None:
-    await bot.set_webhook(f"{HOOK_URL}{HOOK_PATH}", secret_token=SECRET)
+    await bot.set_webhook(f"{HOOK_URL}{HOOK_PATH}",
+                          drop_pending_updates=True,
+                          secret_token=SECRET)
 
 
 def run_webhook() -> None:
@@ -37,6 +39,7 @@ def run_webhook() -> None:
 
     # add handler(s)
     dp.include_routers(
+        callback.r,
         general.r,
         anime_schedule.r,
     )
