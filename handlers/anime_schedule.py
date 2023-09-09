@@ -48,8 +48,12 @@ async def __get_schedule(day: str = "", page: int = 1) -> AnimeSched:
     for i, d in enumerate(body['data']):
         res += f"<b>{i + 1}. <a href='{d['url']}'>{d['title']}</a></b>\n"
         res += f"<pre>  Japanese : {d['title_japanese']}</pre>\n"
+        res += f"<pre>  Type     : {d['type']}</pre>\n"
+        res += f"<pre>  Episodes : {d['episodes']}</pre>\n"
+        res += f"<pre>  Source   : {d['source']}</pre>\n"
         res += f"<pre>  Duration : {d['duration']}</pre>\n"
         res += f"<pre>  Score    : {d['score']}</pre>\n"
+        res += f"<pre>  Status   : {d['status']}</pre>\n"
         res += f"<pre>  Rating   : {d['rating']}</pre>\n"
 
         genres = utils.join_list_dict(d['genres'], 'name')
