@@ -11,12 +11,16 @@ r = Router()
 
 @r.callback_query()
 async def callback_fn(cb: CallbackQuery, bot: Bot) -> None:
-    # code:udata
-    code, udata = utils.tok_1(cb.data, ":")
+    if cb.data is None:
+        await cb.answer(f"no data")
+        return
 
-    if code == anime_schedule.CALLBACK_ID:
+    # code:udata
+    id, udata = utils.tok_1(cb.data, ":")
+
+    if id == anime_schedule.CALLBACK_ID:
         await anime_schedule.run_cb(bot, cb.message, udata)
-    elif code == general.CALLBACK_ID:
+    elif id == general.CALLBACK_ID:
         await general.run_cb(bot, cb.message, udata)
     else:
-        print("well")
+        await cb.answer(f"invalid callback id: {id}")
