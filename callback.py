@@ -15,7 +15,6 @@ async def callback_fn(cb: CallbackQuery, bot: Bot) -> None:
         await cb.answer(f"no data")
         return
 
-    # code:udata
     id, udata = utils.tok_1(cb.data, ":")
 
     if id == anime_schedule.CALLBACK_ID:
