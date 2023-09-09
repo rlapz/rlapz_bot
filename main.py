@@ -29,15 +29,10 @@ HOOK = HOOK_URL + HOOK_PATH
 
 
 async def startup_fn(bot: Bot) -> None:
-    logging.info(f"setting webhook: {HOOK}...")
+    logging.info(f"setting up webhook: {HOOK}...")
     await bot.set_webhook(f"{HOOK}",
                           secret_token=SECRET,
                           drop_pending_updates=True)
-
-
-async def shutdown_fn(bot: Bot) -> None:
-    logging.info(f"deleting webhook: {HOOK}...")
-    await bot.delete_webhook(drop_pending_updates=True)
 
 
 def new_dispatcher() -> Dispatcher:
@@ -56,7 +51,6 @@ def new_dispatcher() -> Dispatcher:
 def run_webhook() -> None:
     dp = new_dispatcher()
     dp.startup.register(startup_fn)
-    dp.shutdown.register(shutdown_fn)
 
     bot = Bot(TOKEN, parse_mode=ParseMode.HTML)
     req = SimpleRequestHandler(dp, bot, secret_token=SECRET)
