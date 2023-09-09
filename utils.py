@@ -1,4 +1,5 @@
 import aiohttp
+from aiohttp import ClientResponse
 from datetime import datetime
 import pytz
 
@@ -40,14 +41,7 @@ def tok_1(arg: str, sep: str) -> (str, str):
     return (ret.strip(" "), arg[pos:].strip(" "))
 
 
-async def http_request_json(url: str) -> (bool, object()):
+async def http_request_json(url: str) -> (ClientResponse, object()):
     async with aiohttp.ClientSession() as sess:
         async with sess.get(url) as resp:
-            if resp.content_type != "application/json":
-                return (False, f"Invalid response type: {resp.content_type}")
-
-            body = await resp.json()
-            if resp.status != 200:
-                return (False, body)
-
-            return (True, body)
+            return (resp, await resp.json())
