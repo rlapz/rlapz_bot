@@ -45,3 +45,11 @@ async def http_request_json(url: str) -> (ClientResponse, object()):
     async with aiohttp.ClientSession() as sess:
         async with sess.get(url) as resp:
             return (resp, await resp.json())
+
+
+def join_list_dict(arg, key: str) -> str:
+    _list = []
+    for x in arg:
+        _list.append(x[key])
+
+    return ', '.join(_list)

@@ -54,20 +54,14 @@ async def __get_schedule(day: str = "", page: int = 1) -> AnimeSched:
         res += f"<pre>  Score    : {d['score']}</pre>\n"
         res += f"<pre>  Rating   : {d['rating']}</pre>\n"
 
-        res += "<pre>  Genre    : "
-        for g in d['genres']:
-            res += f"{g['name']}, "
-        res += "</pre>\n"
+        genres = utils.join_list_dict(d['genres'], 'name')
+        res += f"<pre>  Genre    : {genres}</pre>"
 
-        res += "<pre>  Themes   : "
-        for t in d['themes']:
-            res += f"{t['name']}, "
-        res += "</pre>\n"
+        themes = utils.join_list_dict(d['themes'], 'name')
+        res += f"<pre>  Themes   : {themes}</pre>"
 
-        res += "<pre>  Dgraphics: "
-        for dm in d['demographics']:
-            res += f"{dm['name']}, "
-        res += "</pre>\n\n"
+        dgraphics = utils.join_list_dict(d['demographics'], 'name')
+        res += f"<pre>  Dgraphics: {dgraphics}</pre>\n\n"
 
     return AnimeSched(day, curr_page, has_next, res)
 
