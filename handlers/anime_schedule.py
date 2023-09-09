@@ -13,27 +13,26 @@ r = Router()
 
 
 class AnimeSched:
-    day: str
     page: int
     has_next: bool
+    day: str
     result: str
 
-    def __init__(self, day: str = "", page: int = -1,
-                 has_next: bool = False, result: str = "") -> None:
-        self.day = day
+    def __init__(self, page: int, has_next: bool, day: str, result: str) -> None:
         self.page = page
         self.has_next = has_next
+        self.day = day
         self.result = result
 
 
-async def __get_schedule(day: str = "", page: int = 1) -> AnimeSched:
+async def __get_schedule(page: int, day: str) -> AnimeSched:
     if len(day) == 0:
         day = utils.get_current_day()
 
     url = f"{TARGET_URL}?page={page}&filter={day}&limit={TARGET_LIMIT}&kids=false"
     resp, body = await utils.http_request_json(url)
     if resp.status != 200:
-        raise f"invalid response status: {resp.status}"
+        raise Exception(f"invalid response status: {resp.status}")
 
     pagination = body['pagination']
     curr_page = int(pagination['current_page'])
@@ -65,21 +64,21 @@ async def __get_schedule(day: str = "", page: int = 1) -> AnimeSched:
         dgraphics = utils.join_list_dict(d['demographics'], 'name')
         res += f"<pre>  Dgraphics: {dgraphics}</pre>\n\n"
 
-    return AnimeSched(day, curr_page, has_next, res)
+    return AnimeSched(curr_page, has_next, day, res)
 
 
-def __gen_kbd(page: int, has_next: bool, udata: str) -> InlineKeyboardMarkup:
+def __gen_kbd(page: int, has_next: bool, day: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     if page > 1:
         builder.button(
             text="Prev",
-            callback_data=f"{CALLBACK_ID}:{page - 1}:{udata}"
+            callback_data=f"{CALLBACK_ID}:{page - 1}:{day}"
         )
 
     if has_next:
         builder.button(
             text="Next",
-            callback_data=f"{CALLBACK_ID}:{page + 1}:{udata}"
+            callback_data=f"{CALLBACK_ID}:{page + 1}:{day}"
         )
 
     return builder.as_markup()
@@ -91,17 +90,17 @@ def __gen_kbd(page: int, has_next: bool, udata: str) -> InlineKeyboardMarkup:
 @r.message(filters.Command("anime_schedule"))
 async def cmd_anime_sched_fn(msg: Message) -> None:
     try:
-        _, arg = utils.tok_1(msg.text, " ")
+        _, day = utils.tok_1(msg.text, " ")
 
-        arg = arg.lower()
-        if len(arg) > 0 and arg not in utils.days:
-            await msg.reply(err(f"invalid day name: {arg}"))
+        day = day.lower()
+        if len(day) > 0 and day not in utils.days:
+            await msg.reply(err(f"invalid day name: {day}"))
             return
 
-        res = await __get_schedule(day=arg)
+        res = await __get_schedule(1, day)
         await msg.reply(
             text=res.result,
-            reply_markup=__gen_kbd(res.page, res.has_next, arg)
+            reply_markup=__gen_kbd(res.page, res.has_next, day)
         )
     except Exception as e:
         await msg.reply(err(e))
@@ -110,14 +109,17 @@ async def cmd_anime_sched_fn(msg: Message) -> None:
 async def run_cb(bot: Bot, msg: Message, udata: str) -> None:
     page, day = utils.tok_1(udata, ":")
 
-    res = await __get_schedule(day, page)
-    await bot.edit_message_text(
-        chat_id=msg.chat.id, message_id=msg.message_id,
-        text=res.result
-    )
+    try:
+        res = await __get_schedule(page, day)
+        await bot.edit_message_text(
+            chat_id=msg.chat.id, message_id=msg.message_id,
+            text=res.result
+        )
 
-    await bot.edit_message_reply_markup(
-        chat_id=msg.chat.id,
-        message_id=msg.message_id,
-        reply_markup=__gen_kbd(res.page, res.has_next, res.day)
-    )
+        await bot.edit_message_reply_markup(
+            chat_id=msg.chat.id,
+            message_id=msg.message_id,
+            reply_markup=__gen_kbd(res.page, res.has_next, res.day)
+        )
+    except Exception as e:
+        await msg.answer(err(e))
