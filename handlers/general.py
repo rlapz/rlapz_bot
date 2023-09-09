@@ -1,6 +1,5 @@
 from aiogram import Bot, Router, filters
 from aiogram.types import Message
-from aiogram.utils import markdown as md
 from aiogram.types import Message, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
@@ -22,7 +21,7 @@ async def cmd_start_fn(msg: Message) -> None:
     await msg.answer("Bacott :)")
 
 
-def gen_kbd(id: str, udata: str) -> InlineKeyboardMarkup:
+def __gen_kbd(id: str, udata: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.button(
         text="Press",
@@ -34,7 +33,7 @@ def gen_kbd(id: str, udata: str) -> InlineKeyboardMarkup:
 
 @r.message(filters.Command("test_btn"))
 async def cmd_test_btn(msg: Message) -> None:
-    markup = gen_kbd(CALLBACK_ID, f"@{msg.from_user.username}")
+    markup = __gen_kbd(CALLBACK_ID, f"@{msg.from_user.username}")
     await msg.reply("...", reply_markup=markup)
 
 

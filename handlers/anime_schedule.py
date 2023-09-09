@@ -1,9 +1,7 @@
-from aiohttp import ClientResponse
 from aiogram import Bot, Router, filters
 from aiogram.types import Message, InlineKeyboardMarkup
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
-import callback
 import utils
 from utils import err
 
@@ -66,7 +64,7 @@ async def __get_schedule(day: str = "", page: int = 1) -> AnimeSched:
     return AnimeSched(day, curr_page, has_next, res)
 
 
-def gen_kbd(page: int, has_next: bool, udata: str) -> InlineKeyboardMarkup:
+def __gen_kbd(page: int, has_next: bool, udata: str) -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     if page > 1:
         builder.button(
@@ -99,7 +97,7 @@ async def cmd_anime_sched_fn(msg: Message) -> None:
         res = await __get_schedule(day=arg)
         await msg.reply(
             text=res.result,
-            reply_markup=gen_kbd(res.page, res.has_next, arg)
+            reply_markup=__gen_kbd(res.page, res.has_next, arg)
         )
     except Exception as e:
         await msg.reply(err(e))
@@ -117,5 +115,5 @@ async def run_cb(bot: Bot, msg: Message, udata: str) -> None:
     await bot.edit_message_reply_markup(
         chat_id=msg.chat.id,
         message_id=msg.message_id,
-        reply_markup=gen_kbd(res.page, res.has_next, res.day)
+        reply_markup=__gen_kbd(res.page, res.has_next, res.day)
     )
